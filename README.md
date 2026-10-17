@@ -13,14 +13,31 @@ Built on [Arkiv](https://arkiv.network) Tiramisu testnet.
 
 ## Status
 
-M0 working model: vault + heartbeat + lapse detection + guardian release.
+M0 working model: vault + heartbeat + lapse detection + guardian release, with a web UI.
+
+## Web demo
+
+```bash
+npm install
+npm run dev          # API on :8787, UI on :5190 (Vite proxies /api)
+```
+
+Open http://localhost:5190, seal a vault, set a short check-in interval (e.g. 5s),
+and watch the switch fire. **Demo mode** (no wallet) runs the same state machine
+in memory; add a funded `PRIVATE_KEY` to run live against Tiramisu.
+
+To serve the built UI from the API only:
+
+```bash
+npm run build:web
+npm run dev:api      # http://localhost:8787
+```
 
 ## Setup
 
 ```bash
-npm install
-cp .env.example .env    # add a funded Tiramisu PRIVATE_KEY
-npm run typecheck
+cp .env.example .env    # add a funded Tiramisu PRIVATE_KEY (optional for the demo)
+npm run typecheck:all
 ```
 
 Fund a wallet at https://hub.arkiv.network/faucet, then:

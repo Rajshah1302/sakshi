@@ -13,16 +13,34 @@
     "release": "tsx src/cli/release.ts",
     "simulate": "tsx scripts/simulate.ts",
     "simulate:switch": "tsx scripts/simulate-switch.ts",
-    "typecheck": "tsc --noEmit"
+    "test:backend": "tsx scripts/test-backend.ts",
+    "dev": "concurrently -k -n api,web -c cyan,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "tsx server/index.ts",
+    "dev:web": "vite --config web/vite.config.ts",
+    "build:web": "vite build --config web/vite.config.ts",
+    "typecheck": "tsc --noEmit",
+    "typecheck:web": "tsc -p web/tsconfig.json --noEmit",
+    "typecheck:all": "npm run typecheck && npm run typecheck:web"
   },
   "dependencies": {
     "@arkiv-network/sdk": "^0.8.1",
+    "cors": "^2.8.6",
     "dotenv": "^16.4.5",
+    "express": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "viem": "^2.21.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.7.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
     "tsx": "^4.19.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vite": "^8.3.4"
   }
 }
