@@ -104,7 +104,7 @@ export default function SettingsPage() {
           <li>The key is split 2-of-3 with Shamir's Secret Sharing across guardians.</li>
           <li>A heartbeat entity on Arkiv expires at your deadline; checking in extends it.</li>
           <li>When the heartbeat lapses, guardians combine any two shares to open the vault.</li>
-          <li>The vault is a permanent, readonly entity — the evidence outlives the switch.</li>
+          <li>The vault is a permanent, readonly entity, the evidence outlives the switch.</li>
         </ul>
       </section>
     </div>

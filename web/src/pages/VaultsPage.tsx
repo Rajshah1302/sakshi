@@ -27,7 +27,7 @@ export default function VaultsPage() {
       {vaults.length === 0 ? (
         <EmptyState
           title="No vaults yet"
-          body="Seal a message, or a pointer to the full record. It is encrypted on this device — only the sealed ciphertext is stored."
+          body="Seal a message, or a pointer to the full record. It is encrypted on this device, only the sealed ciphertext is stored."
           action={
             <Link className="button primary" to="/create">
               Create your first vault

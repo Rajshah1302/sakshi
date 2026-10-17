@@ -3,7 +3,7 @@
 **An encrypted dead-man's switch for at-risk journalists and protesters.**
 
 Sakshi keeps a piece of evidence sealed while you check in. If you go silent, it
-releases — to the guardians you chose, never to the public.
+releases, to the guardians you chose, never to the public.
 
 - **Durable vault.** Encrypted evidence and its hash live in a `readonly` entity that survives.
 - **Heartbeat.** A separate entity expires at your check-in deadline; checking in extends it.
@@ -15,13 +15,13 @@ Built on [Arkiv](https://arkiv.network) Tiramisu testnet.
 
 A product, not a demo page:
 
-- **Vaults** — dashboard with sealed/released counts and a live countdown per vault.
-- **New vault** — seal evidence with a check-in interval; receive a 3-share recovery kit.
-- **Vault detail** — countdown ring, check-in, recovery kit (reveal/download), activity timeline, and a guardian unseal panel once the switch fires.
-- **Guardians** — open any vault with two shares; verify a vault's evidence hash.
-- **Settings** — network/mode, default interval, and local-data controls.
+- **Vaults**: dashboard with sealed/released counts and a live countdown per vault.
+- **New vault**: seal evidence with a check-in interval; receive a 3-share recovery kit.
+- **Vault detail**: countdown ring, check-in, recovery kit (reveal/download), activity timeline, and a guardian unseal panel once the switch fires.
+- **Guardians**: open any vault with two shares; verify a vault's evidence hash.
+- **Settings**: network/mode, default interval, and local-data controls.
 
-Vault metadata and guardian shares are stored **on this device** (localStorage) —
+Vault metadata and guardian shares are stored **on this device** (localStorage).
 Sakshi is self-custodial.
 
 ```bash

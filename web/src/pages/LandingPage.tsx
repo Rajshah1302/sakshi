@@ -6,6 +6,92 @@ import { shortKey } from "../time";
 import { useReveal } from "../useReveal";
 import "../landing.css";
 
+const NEWS = [
+  {
+    source: "RSF",
+    date: "13 Oct 2026",
+    title: "Around 40 journalists detained while covering electoral-roll protests",
+    body: "Police in New Delhi and other cities held reporters covering protests against the electoral roll revision for several hours.",
+    impact: "When the people filming a protest are detained, the record depends on who holds the footage.",
+    href: "https://rsf.org/en/unprecedented-police-crackdown-press-india-around-40-journalists-covering-protests-against",
+    image:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Lambodar_Prasad_Dash_leading_Journalists_Protest_rally.jpg/1280px-Lambodar_Prasad_Dash_leading_Journalists_Protest_rally.jpg",
+    alt: "Journalists holding placards at a protest rally",
+    credit: "Photo: Lambodar999, CC BY-SA 4.0",
+    creditHref:
+      "https://commons.wikimedia.org/wiki/File:Lambodar_Prasad_Dash_leading_Journalists_Protest_rally.jpg",
+  },
+  {
+    source: "RSF",
+    date: "2026 Index",
+    title: "India ranks 157th of 180 for press freedom",
+    body: "RSF's 2026 index places India at 157th of 180, with a score of 31.96. Critical reporters face harassment, legal cases, and physical attacks.",
+    impact: "A reporter under pressure needs their evidence to be somewhere the pressure cannot reach.",
+    href: "https://rsf.org/en/country/india",
+    image:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/2020_Indian_farmers%27_protest_-_sitting_protest.jpg/1280px-2020_Indian_farmers%27_protest_-_sitting_protest.jpg",
+    alt: "Protesters seated at a large sit-in",
+    credit: "Photo: Randeep Maddoke, CC BY-SA 4.0",
+    creditHref:
+      "https://commons.wikimedia.org/wiki/File:2020_Indian_farmers%27_protest_-_sitting_protest.jpg",
+  },
+  {
+    source: "RSF",
+    date: "Safety",
+    title: "Two to three journalists are killed for their work every year",
+    body: "RSF calls India one of the world's most dangerous countries for media professionals. Prosecutions and arbitrary arrests are routine.",
+    impact: "A phone that holds the only copy is a single point of failure.",
+    href: "https://rsf.org/en/country/india",
+    image:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Farmers%27_protest_at_Singhu_Border_%2815_February_2021%29.jpg/1280px-Farmers%27_protest_at_Singhu_Border_%2815_February_2021%29.jpg",
+    alt: "A crowd of protesters at the Singhu border",
+    credit: "Photo: Satdeep Gill, CC BY-SA 4.0",
+    creditHref:
+      "https://commons.wikimedia.org/wiki/File:Farmers%27_protest_at_Singhu_Border_(15_February_2021).jpg",
+  },
+  {
+    source: "Access Now",
+    date: "31 Mar 2026",
+    title: "313 internet shutdowns in 2025, the highest since 2016",
+    body: "Access Now and the #KeepItOn coalition documented 313 shutdowns across 52 countries. India has repeatedly topped the world's shutdown rankings.",
+    impact: "When the network goes down, the evidence has to already be somewhere else.",
+    href: "https://www.accessnow.org/keepiton-2025-report",
+    image:
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Indian_Farmers%27_Protest_by_Ravan_Khosa_37_%28ed_RE1%29.jpg/1280px-Indian_Farmers%27_Protest_by_Ravan_Khosa_37_%28ed_RE1%29.jpg",
+    alt: "Protesters gathered during a farmers' protest",
+    credit: "Photo: Ravan Khosa, CC BY-SA 4.0",
+    creditHref:
+      "https://commons.wikimedia.org/wiki/File:Indian_Farmers%27_Protest_by_Ravan_Khosa_37_(ed_RE1).jpg",
+  },
+];
+
+const QUESTIONS = [
+  {
+    q: "Why India?",
+    a: "India ranks 157th of 180 for press freedom. In October 2026, around 40 journalists were detained covering the electoral-roll protests. Shutdowns are routine. This is where the harm is concentrated.",
+  },
+  {
+    q: "Why censorship resistance?",
+    a: "The vault and the heartbeat are public Arkiv entities. Anyone can read and query them without our backend. If this site is blocked, the evidence still verifies.",
+  },
+  {
+    q: "Why privacy?",
+    a: "Only AES-256-GCM ciphertext reaches Arkiv. The key never leaves the device. Two of three guardians hold the shares needed to reconstruct it.",
+  },
+  {
+    q: "Why Arkiv?",
+    a: "A normal database can be switched off, rewritten, or seized with its operator. Arkiv gives us an immutable creator, a public read path, and native expiry that we use as the switch.",
+  },
+  {
+    q: "How we use Arkiv",
+    a: "Vault is a readonly, permanent entity. Beat expires at the deadline, and extendEntity is a check-in. Release records that the switch fired. We use the creator field for authorship, cursors for pagination, and WebSocket events for live updates.",
+  },
+  {
+    q: "Friction report",
+    a: "We logged the real problems: expiry emits no event, readonly does not stop extension, extendEntity sets instead of adds, and the SDK requires a predicate. Each entry has expected vs actual, versions, and repro steps in arkiv/friction.md.",
+  },
+];
+
 export default function LandingPage() {
   useReveal();
   const [stats, setStats] = useState<Stats | null>(null);
@@ -41,7 +127,7 @@ export default function LandingPage() {
     { prompt: "$", tone: "cmd", text: "npm run checkin -- 0x8f2a…21c4" },
     { prompt: "✓", tone: "ok", text: "extended       +7d" },
     { prompt: "$", tone: "cmd", text: "npm run watch" },
-    { prompt: "!", tone: "warn", text: "heartbeat lapsed — 2 of 3 shares required" },
+    { prompt: "!", tone: "warn", text: "heartbeat lapsed, 2 of 3 shares required" },
   ];
 
   return (
@@ -60,9 +146,9 @@ export default function LandingPage() {
         </Link>
 
         <nav className="nav-links" aria-label="Sections">
-          <a href="#product">Product</a>
+          <a href="#stakes">Why it matters</a>
+          <a href="#why">Why Arkiv</a>
           <a href="#how">How it works</a>
-          <a href="#security">Security</a>
           <a href="#faq">FAQ</a>
         </nav>
 
@@ -79,23 +165,24 @@ export default function LandingPage() {
       <main id="main">
         <section className="hero">
           <div className="hero-badge">
-            <i aria-hidden="true" /> Live on Arkiv · {modeLabel}
+            <i aria-hidden="true" /> A dead man’s switch for evidence
           </div>
           <h1>
-            If you go quiet,
+            The story survives
             <br />
-            <span>it speaks.</span>
+            <span>the silence.</span>
           </h1>
           <p className="hero-sub">
-            Sakshi keeps a source’s evidence sealed while they check in. If they stop — detained,
-            silenced, offline — it releases to the guardians they chose. Never to the public.
+            Sakshi is for the journalists and RTI activists reporting from India’s hardest places.
+            Evidence stays sealed while they check in. If they cannot, it goes to the guardians they
+            chose.
           </p>
           <div className="hero-actions">
             <Link className="btn btn-primary" to="/create">
               Seal a vault
             </Link>
-            <a className="btn btn-secondary" href="#how">
-              How it works
+            <a className="btn btn-secondary" href="#stakes">
+              Why it matters
             </a>
           </div>
           <p className="hero-meta">
@@ -113,80 +200,87 @@ export default function LandingPage() {
           </div>
           <div className="strip-stats" aria-live="polite">
             <div>
-              <b>{stats?.total ?? "—"}</b>
+              <b>{stats?.total ?? "…"}</b>
               <span>vaults</span>
             </div>
             <div>
-              <b className="teal">{stats?.sealed ?? "—"}</b>
+              <b className="teal">{stats?.sealed ?? "…"}</b>
               <span>sealed</span>
             </div>
             <div>
-              <b className="rose">{stats?.released ?? "—"}</b>
+              <b className="rose">{stats?.released ?? "…"}</b>
               <span>released</span>
             </div>
           </div>
           <div className="strip-anchor">
             <span>Latest anchor</span>
-            <code>{latestHash ? shortKey(latestHash) : "—"}</code>
+            <code>{latestHash ? shortKey(latestHash) : "…"}</code>
           </div>
         </section>
 
-        <section className="section" id="product">
+        <section className="section" id="stakes">
           <div className="section-head">
-            <p className="kicker">Product</p>
-            <h2>Everything a source needs. Nothing an adversary can use.</h2>
+            <p className="kicker">Why it matters</p>
+            <h2>This is not a hypothetical.</h2>
             <p className="section-sub">
-              Sakshi is three small primitives — a sealed vault, a heartbeat, and a quorum of
-              guardians — that outlive the person who sealed them.
+              Reporters in India are detained, attacked, and cut off. When the person holding the
+              evidence is silenced, the evidence usually goes with them.
             </p>
           </div>
 
-          <div className="bento">
-            <article className="bento-card span-2" data-reveal>
-              <p className="kicker">Seal</p>
-              <h3>Encrypted on your device.</h3>
-              <p>
-                Evidence is sealed with AES-256-GCM before it leaves the browser. Only ciphertext
-                reaches Arkiv — no document, no PII, no metadata.
-              </p>
-              <div className="mini-code">
-                <span>const</span> sealed = <span>encrypt</span>(key, evidence)
-              </div>
-            </article>
+          <div className="news-grid">
+            {NEWS.map((item) => (
+              <article className="news-card" key={item.title} data-reveal>
+                <div className="news-media">
+                  <img src={item.image} alt={item.alt} loading="lazy" width={800} height={500} />
+                  <span className="news-source">
+                    {item.source} · {item.date}
+                  </span>
+                </div>
+                <div className="news-body">
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                  <p className="news-impact">{item.impact}</p>
+                  <a href={item.href} target="_blank" rel="noreferrer">
+                    Read the report <span aria-hidden="true">↗</span>
+                  </a>
+                </div>
+                <a className="news-credit" href={item.creditHref} target="_blank" rel="noreferrer">
+                  {item.credit}
+                </a>
+              </article>
+            ))}
+          </div>
 
-            <article className="bento-card" data-reveal>
-              <p className="kicker">Heartbeat</p>
-              <h3>A switch that expires.</h3>
-              <p>An Arkiv entity dies at your deadline. Checking in extends it.</p>
-              <div className="mini-bar">
-                <span style={{ width: "64%" }} />
-              </div>
-            </article>
+          <p className="sources">
+            Reporting:{" "}
+            <a href="https://rsf.org/en/country/india" target="_blank" rel="noreferrer">
+              RSF
+            </a>
+            ,{" "}
+            <a href="https://www.accessnow.org/keepiton/" target="_blank" rel="noreferrer">
+              Access Now
+            </a>
+            . Photographs: Wikimedia Commons, CC BY-SA 4.0.
+          </p>
+        </section>
 
-            <article className="bento-card" data-reveal>
-              <p className="kicker">Guardians</p>
-              <h3>Two secrets, never one.</h3>
-              <p>Any 2 of 3 shares reconstruct the key.</p>
-              <div className="mini-shares">
-                <i>01</i>
-                <i>02</i>
-                <i>03</i>
-              </div>
-            </article>
+        <section className="section" id="why">
+          <div className="section-head">
+            <p className="kicker">Why this, why Arkiv</p>
+            <h2>The questions we had to answer.</h2>
+            <p className="section-sub">
+              The short version, in the order the judges ask it.
+            </p>
+          </div>
 
-            <article className="bento-card" data-reveal>
-              <p className="kicker">Anchor</p>
-              <h3>Permanent evidence.</h3>
-              <p>The vault is readonly; only the heartbeat expires.</p>
-              <code className="mini-hash">{latestHash ? shortKey(latestHash) : "0x51fc…298f68"}</code>
-            </article>
-
-            <article className="bento-card" data-reveal>
-              <p className="kicker">Open source</p>
-              <h3>Audit every line.</h3>
-              <p>MIT licensed. Schema and crypto are in the repo.</p>
-              <div className="mini-tag">MIT</div>
-            </article>
+          <div className="qa-grid">
+            {QUESTIONS.map((item) => (
+              <article className="qa-card" key={item.q} data-reveal>
+                <h3>{item.q}</h3>
+                <p>{item.a}</p>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -198,15 +292,15 @@ export default function LandingPage() {
 
           <div className="steps">
             <div className="step" data-reveal>
-              <span className="step-num">01 — Seal</span>
+              <span className="step-num">01 · Seal</span>
               <h3>Encrypt on device</h3>
               <p>
-                Encrypt the evidence locally. Only ciphertext reaches Arkiv. The key is split
-                2-of-3 across your guardians.
+                The evidence is encrypted locally. Only ciphertext goes to Arkiv. The key is split
+                into three shares.
               </p>
             </div>
             <div className="step" data-reveal>
-              <span className="step-num">02 — Check in</span>
+              <span className="step-num">02 · Check in</span>
               <h3>Extend the heartbeat</h3>
               <p>
                 A heartbeat entity expires at your deadline. Every check-in extends it. Miss one
@@ -214,7 +308,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="step" data-reveal>
-              <span className="step-num">03 — Release</span>
+              <span className="step-num">03 · Release</span>
               <h3>Guardians open it</h3>
               <p>
                 Guardians combine any two shares to open the vault. The permanent vault outlives
@@ -222,40 +316,20 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
-        </section>
 
-        <section className="section" id="security">
-          <div className="security">
-            <div>
-              <p className="kicker">Security</p>
-              <h2>The chain sees ciphertext. Nothing else.</h2>
-              <p className="section-sub">
-                Sakshi is built so that losing the device, the browser, or the company does not
-                lose the evidence — and so that no single guardian can open it early.
-              </p>
-              <ul className="checks">
-                <li>AES-256-GCM sealing, on device</li>
-                <li>Shamir 2-of-3 key shares</li>
-                <li>No PII written to Arkiv</li>
-                <li>Permanent, readonly vault anchor</li>
-                <li>Revocable, expiring consent</li>
-              </ul>
+          <div className="terminal" aria-hidden="true">
+            <div className="terminal-bar">
+              <i />
+              <i />
+              <i />
+              <span>sakshi, zsh</span>
             </div>
-
-            <div className="terminal" aria-hidden="true">
-              <div className="terminal-bar">
-                <i />
-                <i />
-                <i />
-                <span>sakshi — zsh</span>
-              </div>
-              <div className="terminal-body">
-                {terminal.map((line, index) => (
-                  <div key={index} className={line.tone}>
-                    <span className="prompt">{line.prompt}</span> {line.text}
-                  </div>
-                ))}
-              </div>
+            <div className="terminal-body">
+              {terminal.map((line, index) => (
+                <div key={index} className={line.tone}>
+                  <span className="prompt">{line.prompt}</span> {line.text}
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -271,22 +345,22 @@ export default function LandingPage() {
               <details>
                 <summary>Is my evidence really private?</summary>
                 <p>
-                  Yes. Only AES-256-GCM ciphertext is stored. The key never leaves your device; two
+                  Yes. Only AES-256-GCM ciphertext is stored. The key never leaves your device. Two
                   of three guardians hold the shares needed to reconstruct it.
                 </p>
               </details>
               <details>
                 <summary>What if I lose a share?</summary>
                 <p>
-                  Any two of three shares open the vault. Lose two and it cannot be opened — by
+                  Any two of three shares open the vault. Lose two and it cannot be opened, by
                   anyone, including us.
                 </p>
               </details>
               <details>
                 <summary>What if Arkiv goes down?</summary>
                 <p>
-                  The vault is a permanent, readonly entity; the heartbeat is the switch. The vault
-                  is built to outlive the heartbeat and the person who sealed it.
+                  The vault is a permanent, readonly entity. The heartbeat is the switch. The vault
+                  is built to outlive both the heartbeat and the person who sealed it.
                 </p>
               </details>
               <details>
@@ -329,9 +403,9 @@ export default function LandingPage() {
         </div>
         <div>
           <h4>Product</h4>
-          <a href="#product">Overview</a>
+          <a href="#stakes">Why it matters</a>
+          <a href="#why">Why Arkiv</a>
           <a href="#how">How it works</a>
-          <a href="#security">Security</a>
         </div>
         <div>
           <h4>App</h4>

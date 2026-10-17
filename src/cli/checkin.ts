@@ -14,7 +14,7 @@ async function main(): Promise<void> {
   }
 
   const result = await checkIn(beatKey, intervalS);
-  console.log(`checked in — new deadline ${new Date(result.deadlineMs).toISOString()}`);
+  console.log(`checked in, new deadline ${new Date(result.deadlineMs).toISOString()}`);
   console.log(`tx: ${result.txHash}`);
 }
 

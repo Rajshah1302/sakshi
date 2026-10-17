@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Sakshi — an encrypted dead-man's switch for at-risk journalists and protesters, built on Arkiv.",
+  "description": "Sakshi, an encrypted dead-man's switch for at-risk journalists and protesters, built on Arkiv.",
   "license": "MIT",
   "scripts": {
     "wallet": "tsx scripts/wallet.ts",

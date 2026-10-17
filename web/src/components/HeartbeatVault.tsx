@@ -69,7 +69,7 @@ export default function HeartbeatVault({ live }: { live?: LiveVault }) {
 
       <div className="hv-timer">{released ? "00:00" : formatClock(remainingMs)}</div>
       <div className="hv-sub">
-        {released ? "guardians may now open" : hasLive ? "live — until release" : "until release"}
+        {released ? "guardians may now open" : hasLive ? "live, until release" : "until release"}
       </div>
 
       <div className="hv-bar">

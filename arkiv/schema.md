@@ -1,4 +1,4 @@
-# Sakshi on Arkiv — schema
+# Sakshi on Arkiv, schema
 
 Network: **Arkiv Tiramisu testnet**, chain ID `7738577`, RPC `https://rpc.tiramisu.db-chain.testnet.arkiv.network`.
 SDK: `@arkiv-network/sdk` **0.8.1**. Block time: 2 s.
@@ -16,7 +16,7 @@ namespace cannot collide with other projects.
 
 ### `vault`
 
-Set by the holder. The payload is the only copy of the evidence on Arkiv — encrypted.
+Set by the holder. The payload is the only copy of the evidence on Arkiv, encrypted.
 
 | Attribute | Type | Example | Why |
 |---|---|---|---|
@@ -42,7 +42,7 @@ Set by the holder. This is the dead-man's switch.
 | `deadline` | u64 | `1760000600000` | check-in deadline (unix ms) |
 | `interval_s` | u64 | `604800` | default renewal interval |
 
-Payload: empty (`text/plain`). **No flags** — the owner must be able to extend it.
+Payload: empty (`text/plain`). **No flags**, the owner must be able to extend it.
 
 `$creator` = `$owner` = holder. Its **entity expiry** is the switch: at `deadline` the beat
 leaves the query surface. Checking in patches `deadline` and extends the expiry in one batch.
@@ -62,9 +62,9 @@ Written by the watchdog when the beat lapses.
 
 ## Expiration per type
 
-- **Vault** — permanent: the evidence must outlive the switch.
-- **Beat** — the check-in deadline. `extendEntity` sets a later expiry; it is never additive.
-- **Release** — permanent: the record that the switch fired must survive.
+- **Vault**, permanent: the evidence must outlive the switch.
+- **Beat**, the check-in deadline. `extendEntity` sets a later expiry; it is never additive.
+- **Release**, permanent: the record that the switch fired must survive.
 
 ## Exact queries
 

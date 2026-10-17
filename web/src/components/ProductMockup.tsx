@@ -60,7 +60,7 @@ export default function ProductMockup({ live }: { live?: LiveVault }) {
                 <div className="mock-bar">
                   <span style={{ width: `${progress}%` }} />
                 </div>
-                <span className="mock-btn">I’m here — check in</span>
+                <span className="mock-btn">I’m here, check in</span>
               </div>
 
               <div className="mock-side-card">

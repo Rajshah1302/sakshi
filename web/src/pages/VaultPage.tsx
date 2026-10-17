@@ -214,7 +214,7 @@ export default function VaultPage() {
               onClick={checkIn}
               disabled={busy || status === "released"}
             >
-              {busy ? "Checking in…" : "I'm here — check in"}
+              {busy ? "Checking in…" : "I'm here, check in"}
             </button>
             <span className="muted">Renews for {formatDuration(vault.intervalS * 1000)}</span>
           </div>

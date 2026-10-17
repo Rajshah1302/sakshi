@@ -71,7 +71,7 @@ export function recoveryKit(vault: LocalVault): string {
     `Hash:      ${vault.evidenceHash}`,
     `Created:   ${new Date(vault.createdAt).toISOString()}`,
     "",
-    "Guardian shares — any 2 of 3 reconstruct the key:",
+    "Guardian shares, any 2 of 3 reconstruct the key:",
     ...vault.shares.map((share, index) => `  ${index + 1}. ${share}`),
     "",
     "Store this offline. Never share all three with one person.",

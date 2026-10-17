@@ -1,4 +1,4 @@
-# Building on Arkiv — friction log
+# Building on Arkiv, friction log
 
 Sakshi, October 2026. `@arkiv-network/sdk` **0.8.1**, Node 22.14, Tiramisu testnet (chain 7738577).
 
@@ -7,11 +7,11 @@ Each item is what we expected, what actually happens, and what would fix it. Ite
 
 ---
 
-## 1. Expiry is silent, and expired entities vanish — a dead-man's switch cannot observe it **[docs]**
+## 1. Expiry is silent, and expired entities vanish, a dead-man's switch cannot observe it **[docs]**
 
 - **Expected:** an expiry notification, or a query result that says "this entity lapsed at block N."
 - **Actual:** "There is no event and no grace period" when an entity expires. From the expiry block
-  the entity is gone from every query, and `getEntity()` throws `NoEntityFoundError` — the same
+  the entity is gone from every query, and `getEntity()` throws `NoEntityFoundError`, the same
   error as "never existed" and "was deleted."
 - **Consequence:** a watchdog must remember each beat's `deadline` / `$expiresAt` and poll; it cannot
   learn about the lapse from the chain.
@@ -62,7 +62,7 @@ Each item is what we expected, what actually happens, and what would fix it. Ite
 
 - **Expected:** `client.select().limit(1).fetch()` returns anything.
 - **Actual:** the SDK rejects a match-all query; every query needs a predicate.
-- **Consequence:** every query starts with `eq("project", "sakshi")` — good practice anyway.
+- **Consequence:** every query starts with `eq("project", "sakshi")`, good practice anyway.
 - **Fix:** align the SDK and RPC docs, and say the project predicate is the intended pattern.
 
 ## 8. Keyless reads have a small budget; access keys are server-side **[docs]**

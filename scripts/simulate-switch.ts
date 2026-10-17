@@ -41,7 +41,7 @@ function main(): void {
 
   now += 1_000;
   const lapsed = now >= beat.deadlineMs;
-  log(`t=4.5  ${lapsed ? "LAPSED — watchdog writes Release" : "alive"}`);
+  log(`t=4.5  ${lapsed ? "LAPSED, watchdog writes Release" : "alive"}`);
   if (!lapsed) {
     console.error("expected the beat to lapse");
     process.exit(1);

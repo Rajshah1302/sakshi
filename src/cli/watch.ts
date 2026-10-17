@@ -24,7 +24,7 @@ async function main(): Promise<void> {
       process.exit(1);
     }
     const result = await writeRelease(vaultKey);
-    console.log(`RELEASED — release entity ${result.releaseKey}`);
+    console.log(`RELEASED, release entity ${result.releaseKey}`);
     console.log(`tx: ${result.txHash}`);
   };
 
@@ -37,7 +37,7 @@ async function main(): Promise<void> {
         return true;
       }
       const remaining = Math.round((beat.deadline - Date.now()) / 1000);
-      console.log(`alive — ${remaining}s left — vault ${beat.vaultKey}`);
+      console.log(`alive, ${remaining}s left, vault ${beat.vaultKey}`);
       return false;
     } catch (error) {
       if (error instanceof NoEntityFoundError) {
