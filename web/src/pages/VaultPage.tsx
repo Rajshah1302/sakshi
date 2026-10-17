@@ -13,6 +13,7 @@ import {
   type LocalVault,
   type VaultEventType,
 } from "../store";
+import { reminderIcs } from "../ics";
 import { formatDate, formatDuration, shortKey } from "../time";
 
 function eventLabel(type: VaultEventType): string {
@@ -168,6 +169,28 @@ export default function VaultPage() {
     setVault((current) => (current ? { ...current, kitSaved: true } : current));
   }
 
+  async function copyGuardianLink() {
+    if (!vault) return;
+    const link = `${window.location.origin}/guardians/${vault.vaultKey}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.push("Guardian link copied.", "success");
+    } catch {
+      toast.push("Could not copy the link.", "error");
+    }
+  }
+
+  function downloadReminder() {
+    if (!vault) return;
+    const blob = new Blob([reminderIcs(vault)], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `sakshi-reminder-${vault.vaultKey.slice(0, 8)}.ics`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
   function deleteLocal() {
     if (!vault) return;
     removeVault(vault.vaultKey);
@@ -279,6 +302,12 @@ export default function VaultPage() {
             <div className="panel-actions">
               <button className="button secondary" type="button" onClick={downloadKit}>
                 Download kit
+              </button>
+              <button className="button ghost" type="button" onClick={copyGuardianLink}>
+                Guardian link
+              </button>
+              <button className="button ghost" type="button" onClick={downloadReminder}>
+                Add reminder
               </button>
               {!vault.kitSaved ? (
                 <button

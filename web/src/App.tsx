@@ -19,6 +19,7 @@ export default function App() {
             <Route path="create" element={<CreatePage />} />
             <Route path="vaults/:vaultKey" element={<VaultPage />} />
             <Route path="guardians" element={<GuardianPage />} />
+            <Route path="guardians/:vaultKey" element={<GuardianPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,18 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { api } from "../api";
 import { CopyButton, Field, PageHeader } from "../components/ui";
 import { loadVaults } from "../store";
 import { shortKey } from "../time";
 
 export default function GuardianPage() {
-  const vaults = loadVaults();
-  const [vaultKey, setVaultKey] = useState(vaults[0]?.vaultKey ?? "");
-  const [shareA, setShareA] = useState("");
-  const [shareB, setShareB] = useState("");
+  const { vaultKey: routeKey } = useParams<{ vaultKey?: string }>();
+  const [vaults] = useState(() => loadVaults());
+  const initialKey = routeKey ?? vaults[0]?.vaultKey ?? "";
+  const [vaultKey, setVaultKey] = useState(initialKey);
+  const [shareA, setShareA] = useState(
+    () => vaults.find((vault) => vault.vaultKey === initialKey)?.shares[0] ?? "",
+  );
+  const [shareB, setShareB] = useState(
+    () => vaults.find((vault) => vault.vaultKey === initialKey)?.shares[1] ?? "",
+  );
   const [text, setText] = useState<string | null>(null);
   const [hash, setHash] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!routeKey) return;
+    setVaultKey(routeKey);
+    const match = vaults.find((vault) => vault.vaultKey === routeKey);
+    setShareA(match?.shares[0] ?? "");
+    setShareB(match?.shares[1] ?? "");
+    setText(null);
+    setHash(null);
+    setError(null);
+  }, [routeKey, vaults]);
 
   function pick(key: string) {
     setVaultKey(key);
