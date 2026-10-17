@@ -94,6 +94,7 @@
   font-weight: 400;
   line-height: 0.92;
   letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 
 .hero h1 em {
@@ -244,6 +245,7 @@
   font-family: var(--display);
   font-size: 54px;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .hv-sub {
@@ -351,6 +353,92 @@
   }
 }
 
+/* ---------- live register ---------- */
+
+.live-register {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 22px 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lr-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.lr-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 12px var(--teal);
+  animation: blink 2s ease-in-out infinite;
+}
+
+.lr-mode {
+  padding: 3px 8px;
+  border: 1px solid rgba(94, 234, 212, 0.25);
+  border-radius: 999px;
+  color: var(--teal);
+  font-size: 9.5px;
+}
+
+.lr-stats {
+  display: flex;
+  gap: 34px;
+}
+
+.lr-stats > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.lr-stats strong {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.lr-stats span {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lr-anchor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lr-anchor span {
+  color: var(--faint);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lr-anchor code {
+  color: var(--teal);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
 /* ---------- sections ---------- */
 
 .section {
@@ -359,6 +447,7 @@
   max-width: 1120px;
   margin: 0 auto;
   padding: 96px 40px;
+  scroll-margin-top: 92px;
 }
 
 .section h2 {
@@ -369,6 +458,7 @@
   font-weight: 400;
   line-height: 1.02;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .lead {
@@ -672,6 +762,17 @@
   .guardian-row,
   .facts {
     grid-template-columns: 1fr;
+  }
+
+  .live-register {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 22px;
+  }
+
+  .lr-stats {
+    gap: 26px;
   }
 
   .cta {

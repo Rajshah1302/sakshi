@@ -21,6 +21,22 @@ export interface BeatResponse {
   vaultKey: string;
 }
 
+export interface StatVault {
+  vaultKey: string;
+  evidenceHash?: string;
+  deadlineMs?: number;
+  intervalS?: number;
+  status: "sealed" | "released";
+}
+
+export interface Stats {
+  mode: Mode;
+  total: number;
+  sealed: number;
+  released: number;
+  recent: StatVault[];
+}
+
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api${path}`, {
     headers: { "content-type": "application/json" },
@@ -35,6 +51,7 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => call<Health>("/health"),
+  stats: () => call<Stats>("/stats"),
   create: (text: string, intervalS: number) =>
     call<CreateResponse>("/create", { method: "POST", body: JSON.stringify({ text, intervalS }) }),
   checkIn: (beatKey: string, intervalS: number) =>

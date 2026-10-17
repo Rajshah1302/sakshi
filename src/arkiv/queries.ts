@@ -50,7 +50,7 @@ export async function getVault(vaultKey: `0x${string}`): Promise<VaultView> {
 }
 
 export async function listLiveBeats(): Promise<
-  Array<{ key: `0x${string}`; deadline: number; vaultKey: `0x${string}` }>
+  Array<{ key: `0x${string}`; deadline: number; intervalS: number; vaultKey: `0x${string}` }>
 > {
   const result = await getPublicClient()
     .select("*")
@@ -63,6 +63,7 @@ export async function listLiveBeats(): Promise<
     return {
       key: entity.key as `0x${string}`,
       deadline: readNumber(attrs, "deadline"),
+      intervalS: readNumber(attrs, "interval_s"),
       vaultKey: readString(attrs, "vault_key") as `0x${string}`,
     };
   });

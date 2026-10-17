@@ -18,6 +18,14 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true, mode: backend.mode, address: backend.address ?? null });
 });
 
+app.get("/api/stats", async (_req, res) => {
+  try {
+    res.json(await backend.stats());
+  } catch (error) {
+    res.status(500).json({ error: message(error) });
+  }
+});
+
 app.post("/api/create", async (req, res) => {
   const { text, intervalS } = (req.body ?? {}) as { text?: unknown; intervalS?: unknown };
   if (typeof text !== "string" || text.trim().length === 0) {
