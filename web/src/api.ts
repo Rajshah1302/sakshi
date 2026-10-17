@@ -1,5 +1,11 @@
 export type Mode = "live" | "demo";
 
+export interface Health {
+  ok: boolean;
+  mode: Mode;
+  address: string | null;
+}
+
 export interface CreateResponse {
   vaultKey: string;
   beatKey: string;
@@ -28,7 +34,7 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health: () => call<{ ok: boolean; mode: Mode }>("/health"),
+  health: () => call<Health>("/health"),
   create: (text: string, intervalS: number) =>
     call<CreateResponse>("/create", { method: "POST", body: JSON.stringify({ text, intervalS }) }),
   checkIn: (beatKey: string, intervalS: number) =>
