@@ -26,17 +26,29 @@ npm run typecheck
 Fund a wallet at https://hub.arkiv.network/faucet, then:
 
 ```bash
-npm run create      # create a vault + heartbeat
-npm run checkin     # extend the deadline
-npm run watch       # detect a lapse and write a Release
-npm run release     # guardians combine shares and decrypt
+# 1. seal a file into a permanent vault + create the heartbeat
+npm run create -- ./secret.txt 120
+
+# 2. keep it alive (run before the deadline)
+npm run checkin -- <beatKey> 120
+
+# 3. watch for silence; writes a Release when the heartbeat lapses
+npm run watch -- <beatKey> <vaultKey>
+
+# 4. guardians combine any two shares to decrypt
+npm run release -- <vaultKey> <shareA> <shareB> released.bin
 ```
 
-Run the local logic demo with no wallet:
+Run the local demos with no wallet:
 
 ```bash
-npm run simulate
+npm run simulate         # encryption + threshold round-trip
+npm run simulate:switch  # full create → check-in → lapse → release → unseal timeline
 ```
+
+The on-chain path (`create`/`checkin`/`watch`/`release`) requires a funded
+Tiramisu wallet in `.env`. Without one, `simulate:switch` exercises the same
+state machine in memory.
 
 ## Docs
 

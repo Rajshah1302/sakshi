@@ -11,6 +11,7 @@
     "watch": "tsx src/cli/watch.ts",
     "release": "tsx src/cli/release.ts",
     "simulate": "tsx scripts/simulate.ts",
+    "simulate:switch": "tsx scripts/simulate-switch.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
