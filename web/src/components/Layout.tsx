@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { api, type Health } from "../api";
 import { shortKey } from "../time";
+import CommandPalette from "./CommandPalette";
 
 const NAV = [
   { to: "/vaults", label: "Vaults", icon: "▤", end: true },
@@ -12,12 +13,24 @@ const NAV = [
 
 export default function Layout() {
   const [health, setHealth] = useState<Health | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
     api
       .health()
       .then(setHealth)
       .catch(() => setHealth(null));
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen((value) => !value);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   return (
@@ -36,6 +49,11 @@ export default function Layout() {
               <span>evidence, on your terms</span>
             </div>
           </Link>
+
+          <button className="cmd-trigger" type="button" onClick={() => setPaletteOpen(true)}>
+            <span>Command</span>
+            <kbd>⌘K</kbd>
+          </button>
 
           <nav className="nav">
             {NAV.map((item) => (
@@ -74,6 +92,8 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </>
   );
 }
