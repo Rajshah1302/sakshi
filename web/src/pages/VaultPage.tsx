@@ -104,7 +104,7 @@ export default function VaultPage() {
           title="Vault not found"
           subtitle="This vault is not in your local recovery store."
         />
-        <Link className="button primary" to="/">
+        <Link className="button primary" to="/vaults">
           Back to vaults
         </Link>
       </div>
@@ -173,7 +173,7 @@ export default function VaultPage() {
     removeVault(vault.vaultKey);
     setConfirmDelete(false);
     toast.push("Local record removed.", "info");
-    navigate("/");
+    navigate("/vaults");
   }
 
   return (
@@ -186,7 +186,7 @@ export default function VaultPage() {
         }`}
         actions={
           <>
-            <Link className="button ghost" to="/">
+            <Link className="button ghost" to="/vaults">
               Back
             </Link>
             <button className="button ghost danger" type="button" onClick={() => setConfirmDelete(true)}>

@@ -70,6 +70,18 @@ a {
   align-items: center;
   gap: 12px;
   padding: 0 6px;
+  text-decoration: none;
+}
+
+.sidebar-home {
+  color: var(--faint);
+  font-size: 10.5px;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.sidebar-home:hover {
+  color: var(--teal);
 }
 
 .brand-mark {

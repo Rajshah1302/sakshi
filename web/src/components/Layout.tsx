@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { api, type Health } from "../api";
 import { shortKey } from "../time";
 
 const NAV = [
-  { to: "/", label: "Vaults", icon: "▤", end: true },
+  { to: "/vaults", label: "Vaults", icon: "▤", end: true },
   { to: "/create", label: "New vault", icon: "＋", end: false },
   { to: "/guardians", label: "Guardians", icon: "⚖", end: false },
   { to: "/settings", label: "Settings", icon: "⚙", end: false },
@@ -23,13 +23,13 @@ export default function Layout() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand">
+        <Link className="brand" to="/">
           <span className="brand-mark">◈</span>
           <div>
             <strong>Sakshi</strong>
             <span>evidence, on your terms</span>
           </div>
-        </div>
+        </Link>
 
         <nav className="nav">
           {NAV.map((item) => (
@@ -55,6 +55,9 @@ export default function Layout() {
                 : "Connecting…"}
           </div>
           {health?.address ? <code className="addr">{shortKey(health.address)}</code> : null}
+          <Link className="sidebar-home" to="/">
+            ← Back to site
+          </Link>
           <p className="sidebar-note">AES-256-GCM · Shamir 2-of-3</p>
         </div>
       </aside>
