@@ -65,30 +65,22 @@ const NEWS = [
   },
 ];
 
-const QUESTIONS = [
+const UNDER_THE_HOOD = [
   {
-    q: "Why India?",
-    a: "India ranks 157th of 180 for press freedom. In October 2026, around 40 journalists were detained covering the electoral-roll protests. Shutdowns are routine. This is where the harm is concentrated.",
-  },
-  {
-    q: "Why censorship resistance?",
+    q: "Censorship resistance",
     a: "The vault and the heartbeat are public Arkiv entities. Anyone can read and query them without our backend. If this site is blocked, the evidence still verifies.",
   },
   {
-    q: "Why privacy?",
+    q: "Privacy",
     a: "Only AES-256-GCM ciphertext reaches Arkiv. The key never leaves the device. Two of three guardians hold the shares needed to reconstruct it.",
   },
   {
-    q: "Why Arkiv?",
+    q: "Built on Arkiv",
     a: "A normal database can be switched off, rewritten, or seized with its operator. Arkiv gives us an immutable creator, a public read path, and native expiry that we use as the switch.",
   },
   {
     q: "How we use Arkiv",
-    a: "Vault is a readonly, permanent entity. Beat expires at the deadline, and extendEntity is a check-in. Release records that the switch fired. We use the creator field for authorship, cursors for pagination, and WebSocket events for live updates.",
-  },
-  {
-    q: "Friction report",
-    a: "We logged the real problems: expiry emits no event, readonly does not stop extension, extendEntity sets instead of adds, and the SDK requires a predicate. Each entry has expected vs actual, versions, and repro steps in arkiv/friction.md.",
+    a: "Vault is readonly and permanent. Beat expires at the deadline, and extendEntity is a check-in. Release records that the switch fired. We use the creator field for authorship, cursors for pagination, and WebSocket events for live updates.",
   },
 ];
 
@@ -147,7 +139,7 @@ export default function LandingPage() {
 
         <nav className="nav-links" aria-label="Sections">
           <a href="#stakes">Why it matters</a>
-          <a href="#why">Why Arkiv</a>
+          <a href="#why">Under the hood</a>
           <a href="#how">How it works</a>
           <a href="#faq">FAQ</a>
         </nav>
@@ -267,15 +259,16 @@ export default function LandingPage() {
 
         <section className="section" id="why">
           <div className="section-head">
-            <p className="kicker">Why this, why Arkiv</p>
-            <h2>The questions we had to answer.</h2>
+            <p className="kicker">Under the hood</p>
+            <h2>Built to survive the worst case.</h2>
             <p className="section-sub">
-              The short version, in the order the judges ask it.
+              A sealed vault, a heartbeat, and a quorum of guardians. The record lives on Arkiv,
+              not on our servers.
             </p>
           </div>
 
           <div className="qa-grid">
-            {QUESTIONS.map((item) => (
+            {UNDER_THE_HOOD.map((item) => (
               <article className="qa-card" key={item.q} data-reveal>
                 <h3>{item.q}</h3>
                 <p>{item.a}</p>
@@ -404,7 +397,7 @@ export default function LandingPage() {
         <div>
           <h4>Product</h4>
           <a href="#stakes">Why it matters</a>
-          <a href="#why">Why Arkiv</a>
+          <a href="#why">Under the hood</a>
           <a href="#how">How it works</a>
         </div>
         <div>
