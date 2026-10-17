@@ -11,20 +11,26 @@ releases — to the guardians you chose, never to the public.
 
 Built on [Arkiv](https://arkiv.network) Tiramisu testnet.
 
-## Status
+## App
 
-M0 working model: vault + heartbeat + lapse detection + guardian release, with a web UI.
+A product, not a demo page:
 
-## Web demo
+- **Vaults** — dashboard with sealed/released counts and a live countdown per vault.
+- **New vault** — seal evidence with a check-in interval; receive a 3-share recovery kit.
+- **Vault detail** — countdown ring, check-in, recovery kit (reveal/download), activity timeline, and a guardian unseal panel once the switch fires.
+- **Guardians** — open any vault with two shares; verify a vault's evidence hash.
+- **Settings** — network/mode, default interval, and local-data controls.
+
+Vault metadata and guardian shares are stored **on this device** (localStorage) —
+Sakshi is self-custodial.
 
 ```bash
 npm install
-npm run dev          # API on :8787, UI on :5190 (Vite proxies /api)
+npm run dev          # API on :8787, UI on :5190
 ```
 
-Open http://localhost:5190, seal a vault, set a short check-in interval (e.g. 5s),
-and watch the switch fire. **Demo mode** (no wallet) runs the same state machine
-in memory; add a funded `PRIVATE_KEY` to run live against Tiramisu.
+Open http://localhost:5190. **Demo mode** (no wallet) persists to
+`server/.demo-store.json`; add a funded `PRIVATE_KEY` to run live against Tiramisu.
 
 To serve the built UI from the API only:
 
