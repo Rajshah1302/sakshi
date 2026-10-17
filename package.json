@@ -1,0 +1,26 @@
+{
+  "name": "sakshi",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sakshi — an encrypted dead-man's switch for at-risk journalists and protesters, built on Arkiv.",
+  "license": "MIT",
+  "scripts": {
+    "create": "tsx src/cli/create.ts",
+    "checkin": "tsx src/cli/checkin.ts",
+    "watch": "tsx src/cli/watch.ts",
+    "release": "tsx src/cli/release.ts",
+    "simulate": "tsx scripts/simulate.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@arkiv-network/sdk": "^0.8.1",
+    "dotenv": "^16.4.5",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
