@@ -61,7 +61,12 @@ export default function GuardianPage() {
       <div className="two-col">
         <section className="panel form">
           <Field label="Vault" hint="Choose one of your vaults, or paste any vault key.">
-            <select value={vaultKey} onChange={(event) => pick(event.target.value)}>
+            <select
+              name="vault"
+              aria-label="Vault"
+              value={vaultKey}
+              onChange={(event) => pick(event.target.value)}
+            >
               <option value="">Select a vault…</option>
               {vaults.map((vault) => (
                 <option key={vault.vaultKey} value={vault.vaultKey}>
@@ -70,17 +75,35 @@ export default function GuardianPage() {
               ))}
             </select>
             <input
+              name="vaultKey"
+              aria-label="Vault key"
               value={vaultKey}
               onChange={(event) => setVaultKey(event.target.value)}
               placeholder="0x… vault key"
+              autoComplete="off"
+              spellCheck={false}
             />
           </Field>
 
           <Field label="Guardian share A">
-            <input value={shareA} onChange={(event) => setShareA(event.target.value)} placeholder="hex share" />
+            <input
+              name="shareA"
+              value={shareA}
+              onChange={(event) => setShareA(event.target.value)}
+              placeholder="hex share"
+              autoComplete="off"
+              spellCheck={false}
+            />
           </Field>
           <Field label="Guardian share B">
-            <input value={shareB} onChange={(event) => setShareB(event.target.value)} placeholder="hex share" />
+            <input
+              name="shareB"
+              value={shareB}
+              onChange={(event) => setShareB(event.target.value)}
+              placeholder="hex share"
+              autoComplete="off"
+              spellCheck={false}
+            />
           </Field>
 
           {error ? <p className="error">{error}</p> : null}

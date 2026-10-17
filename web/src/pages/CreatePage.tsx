@@ -75,19 +75,24 @@ export default function CreatePage() {
       <form className="panel form" onSubmit={submit}>
         <Field label="Title" hint="Optional. Shown only on this device.">
           <input
+            name="title"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="e.g. Manipur field notes"
+            autoComplete="off"
+            spellCheck={false}
             autoFocus
           />
         </Field>
 
         <Field label="Evidence" hint="Encrypted before it leaves this device. Up to 128 KiB.">
           <textarea
+            name="evidence"
             rows={8}
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder="The message, or where to find the full record…"
+            autoComplete="off"
           />
         </Field>
 
@@ -106,9 +111,12 @@ export default function CreatePage() {
           </div>
           <input
             type="number"
+            name="interval"
             min={2}
             value={intervalS}
             onChange={(event) => setIntervalS(Number(event.target.value))}
+            inputMode="numeric"
+            autoComplete="off"
           />
         </Field>
 

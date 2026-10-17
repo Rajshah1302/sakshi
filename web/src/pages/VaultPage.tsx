@@ -301,10 +301,22 @@ export default function VaultPage() {
               {vault.releaseKey ? <p className="mono muted">release {shortKey(vault.releaseKey)}</p> : null}
 
               <Field label="Guardian share A">
-                <input value={shareA} onChange={(event) => setShareA(event.target.value)} />
+                <input
+                  name="shareA"
+                  value={shareA}
+                  onChange={(event) => setShareA(event.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                />
               </Field>
               <Field label="Guardian share B">
-                <input value={shareB} onChange={(event) => setShareB(event.target.value)} />
+                <input
+                  name="shareB"
+                  value={shareB}
+                  onChange={(event) => setShareB(event.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                />
               </Field>
               <button
                 className="button primary"

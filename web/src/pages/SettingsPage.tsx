@@ -64,9 +64,12 @@ export default function SettingsPage() {
           <span className="field-label">Default check-in interval (seconds)</span>
           <input
             type="number"
+            name="defaultInterval"
             min={2}
             value={interval}
             onChange={(event) => setInterval(Number(event.target.value))}
+            inputMode="numeric"
+            autoComplete="off"
           />
           <span className="field-hint">Used as the starting value when you create a vault.</span>
         </label>
