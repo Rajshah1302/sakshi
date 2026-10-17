@@ -1,7 +1,10 @@
 import { randomBytes } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { keccak256, toBytes } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { combine, decrypt, encrypt, generateKey, split } from "../src/crypto";
-import { hasPrivateKey } from "../src/config";
+import { hasPrivateKey, requirePrivateKey } from "../src/config";
 import { checkIn, createVaultAndBeat, writeRelease } from "../src/arkiv/mutations";
 import { getBeat, getVault, unsealVault } from "../src/arkiv/queries";
 
@@ -24,6 +27,7 @@ export interface BeatView {
 
 export interface SakshiBackend {
   mode: BackendMode;
+  address?: string;
   create(text: string, intervalS: number): Promise<CreateResult>;
   checkIn(beatKey: string, intervalS: number): Promise<{ deadlineMs: number; txHash?: string }>;
   getBeat(beatKey: string): Promise<BeatView>;
@@ -37,8 +41,11 @@ export function createBackend(): SakshiBackend {
 }
 
 function liveBackend(): SakshiBackend {
+  const address = privateKeyToAccount(requirePrivateKey()).address;
+
   return {
     mode: "live",
+    address,
     async create(text, intervalS) {
       const result = await createVaultAndBeat(new TextEncoder().encode(text), intervalS);
       return {
@@ -83,9 +90,28 @@ interface MemoryBeat {
   intervalS: number;
 }
 
+interface DemoState {
+  vaults: Record<string, MemoryVault>;
+  beats: Record<string, MemoryBeat>;
+}
+
+const STORE_PATH = join(process.cwd(), "server", ".demo-store.json");
+
+function loadState(): DemoState {
+  try {
+    const parsed = JSON.parse(readFileSync(STORE_PATH, "utf8")) as Partial<DemoState>;
+    return { vaults: parsed.vaults ?? {}, beats: parsed.beats ?? {} };
+  } catch {
+    return { vaults: {}, beats: {} };
+  }
+}
+
+function saveState(state: DemoState): void {
+  writeFileSync(STORE_PATH, JSON.stringify(state));
+}
+
 function memoryBackend(): SakshiBackend {
-  const vaults = new Map<string, MemoryVault>();
-  const beats = new Map<string, MemoryBeat>();
+  const state = loadState();
   const randKey = (): string => `0x${randomBytes(32).toString("hex")}`;
 
   return {
@@ -98,36 +124,38 @@ function memoryBackend(): SakshiBackend {
       const beatKey = randKey();
       const deadlineMs = Date.now() + intervalS * 1000;
 
-      vaults.set(vaultKey, { sealed, evidenceHash });
-      beats.set(beatKey, { key: beatKey, vaultKey, deadlineMs, intervalS });
+      state.vaults[vaultKey] = { sealed, evidenceHash };
+      state.beats[beatKey] = { key: beatKey, vaultKey, deadlineMs, intervalS };
+      saveState(state);
 
       return { vaultKey, beatKey, evidenceHash, deadlineMs, shares: split(keyBytes, 3, 2) };
     },
     async checkIn(beatKey, intervalS) {
-      const beat = beats.get(beatKey);
+      const beat = state.beats[beatKey];
       if (!beat) throw new Error("heartbeat not found");
       if (Date.now() >= beat.deadlineMs) throw new Error("heartbeat has expired");
       beat.deadlineMs = Date.now() + intervalS * 1000;
       beat.intervalS = intervalS;
+      saveState(state);
       return { deadlineMs: beat.deadlineMs };
     },
     async getBeat(beatKey) {
-      const beat = beats.get(beatKey);
+      const beat = state.beats[beatKey];
       if (!beat) throw new Error("heartbeat not found");
       if (Date.now() >= beat.deadlineMs) throw new Error("heartbeat has expired");
       return { key: beat.key, deadline: beat.deadlineMs, intervalS: beat.intervalS, vaultKey: beat.vaultKey };
     },
     async getVault(vaultKey) {
-      const vault = vaults.get(vaultKey);
+      const vault = state.vaults[vaultKey];
       if (!vault) throw new Error("vault not found");
       return { evidenceHash: vault.evidenceHash };
     },
     async writeRelease(vaultKey) {
-      if (!vaults.has(vaultKey)) throw new Error("vault not found");
+      if (!state.vaults[vaultKey]) throw new Error("vault not found");
       return { releaseKey: randKey() };
     },
     async unseal(vaultKey, shares) {
-      const vault = vaults.get(vaultKey);
+      const vault = state.vaults[vaultKey];
       if (!vault) throw new Error("vault not found");
       return new TextDecoder().decode(decrypt(combine(shares), vault.sealed));
     },

@@ -6,3 +6,4 @@ dist/
 .DS_Store
 .turbo/
 scripts/out/
+server/.demo-store.json

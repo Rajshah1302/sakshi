@@ -15,7 +15,7 @@ function message(error: unknown): string {
 }
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, mode: backend.mode });
+  res.json({ ok: true, mode: backend.mode, address: backend.address ?? null });
 });
 
 app.post("/api/create", async (req, res) => {
