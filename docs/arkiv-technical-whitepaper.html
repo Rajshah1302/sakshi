@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Sakshi: Technical Arkiv Integration Whitepaper</title>
+<style>
+  @page { size: A4; margin: 19mm 17mm 20mm 17mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    color: #111418;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 10.4pt;
+    line-height: 1.55;
+  }
+  .cover { page-break-after: always; padding-top: 42mm; }
+  .cover .eyebrow { font-size: 9pt; letter-spacing: 0.18em; text-transform: uppercase; color: #0f766e; }
+  .cover h1 { font-size: 30pt; line-height: 1.1; margin: 10pt 0 6pt; letter-spacing: -0.02em; }
+  .cover h2 { font-size: 15pt; font-weight: 400; color: #475467; border: 0; margin: 0 0 26pt; padding: 0; }
+  .cover .meta { font-family: Consolas, "Courier New", monospace; font-size: 9.5pt; color: #344054; line-height: 1.8; }
+  .cover .abstract { margin-top: 18pt; padding: 12pt 14pt; border-left: 3pt solid #0f766e; background: #f7faf9; font-size: 10pt; }
+  .toc { page-break-after: always; }
+  .toc h2 { border: 0; margin-top: 0; }
+  .toc ol { margin: 0; padding-left: 18pt; }
+  .toc li { margin: 4pt 0; }
+  h2 { font-size: 15pt; margin: 20pt 0 8pt; padding-bottom: 3pt; border-bottom: 1px solid #d0d7de; page-break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 14pt 0 5pt; page-break-after: avoid; }
+  p { margin: 0 0 8pt; }
+  ul, ol { margin: 0 0 8pt; padding-left: 18pt; }
+  li { margin: 2pt 0; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 9pt; background: #f2f4f7; padding: 1pt 3pt; border-radius: 2pt; }
+  pre {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 8.7pt;
+    line-height: 1.5;
+    background: #f6f8fa;
+    border: 1px solid #d8dee4;
+    border-radius: 4pt;
+    padding: 8pt 10pt;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    page-break-inside: avoid;
+    margin: 6pt 0 10pt;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0 12pt; font-size: 9.2pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #d0d7de; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { background: #f2f4f7; font-weight: 600; }
+  td code { font-size: 8.6pt; }
+  .note { padding: 8pt 10pt; border-left: 3pt solid #b54708; background: #fffaeb; margin: 8pt 0 12pt; font-size: 9.6pt; }
+  .ok { color: #067647; font-weight: 600; }
+  .no { color: #b42318; font-weight: 600; }
+  .small { font-size: 9pt; color: #475467; }
+  .page-break { page-break-before: always; }
+  .mono { font-family: Consolas, "Courier New", monospace; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="eyebrow">Technical integration paper</div>
+  <h1>Sakshi on Arkiv</h1>
+  <h2>Entity model, lifetime semantics, write and read paths, and failure modes</h2>
+  <div class="meta">
+    Version 0.1<br>
+    October 2026<br>
+    Network: Arkiv Tiramisu testnet, chain ID 7738577<br>
+    SDK: @arkiv-network/sdk 0.8.1<br>
+    Repository: github.com/Rajshah1302/sakshi
+  </div>
+  <div class="abstract">
+    This paper documents how Sakshi uses Arkiv at the entity, attribute, lifetime, and query level.
+    It covers the three entity types, the exact attribute schemas and value types, the check-in
+    transaction, the read and expiry-detection paths, the ownership model, the SDK limits that shaped
+    the design, and the failure modes observed while building. It distinguishes what is implemented
+    from what is specified but not yet implemented. It deliberately excludes product narrative,
+    market context, and pricing.
+  </div>
+</section>
+
+<section class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li>Scope and environment</li>
+    <li>Why Arkiv: the properties the design depends on</li>
+    <li>Entity types</li>
+    <li>Attribute schema and value types</li>
+    <li>Payload encoding</li>
+    <li>Lifetime model: Entity Expiration and Lifetime Extension</li>
+    <li>Write path: creation</li>
+    <li>Write path: check-in</li>
+    <li>Read path and exact queries</li>
+    <li>Lapse detection without an expiry event</li>
+    <li>Release path</li>
+    <li>Ownership, authorship, and the creator field</li>
+    <li>SDK limits and constraints</li>
+    <li>Error taxonomy and handling</li>
+    <li>Cryptographic envelope</li>
+    <li>Implemented versus specified</li>
+    <li>Friction log, technical edition</li>
+    <li>Reproduction</li>
+    <li>File map</li>
+    <li>Appendix A: exact raw RPC queries</li>
+    <li>Appendix B: references</li>
+  </ol>
+</section>
+
+<h2>1. Scope and environment</h2>
+<p>Sakshi stores a sealed evidence payload and a time-scoped heartbeat. The technical surface is a set of Arkiv entities plus a local cryptographic envelope. This paper concerns only that surface.</p>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>Network</td><td>Arkiv Tiramisu testnet</td></tr>
+  <tr><td>Chain ID</td><td><code>7738577</code> (<code>0x7614d1</code>)</td></tr>
+  <tr><td>HTTP RPC</td><td><code>https://rpc.tiramisu.db-chain.testnet.arkiv.network</code></td></tr>
+  <tr><td>WebSocket RPC</td><td><code>wss://rpc.tiramisu.db-chain.testnet.arkiv.network</code></td></tr>
+  <tr><td>Block time</td><td>2 seconds</td></tr>
+  <tr><td>SDK</td><td><code>@arkiv-network/sdk</code> 0.8.1</td></tr>
+  <tr><td>Client</td><td><code>viem</code> 2.x, <code>http()</code> transport</td></tr>
+  <tr><td>Gas token</td><td>GLM</td></tr>
+  <tr><td>Namespacing</td><td><code>project = "sakshi"</code> on every entity</td></tr>
+</table>
+
+<h2>2. Why Arkiv: the properties the design depends on</h2>
+<p>The design uses four properties that are native to Arkiv and awkward to reproduce elsewhere.</p>
+<ol>
+  <li><b>Per-entity expiration.</b> Every entity is created with a lifetime. When the lifetime ends, the entity leaves the query surface. A stored timestamp is inert data; an expiring entity is a state change performed by the database.</li>
+  <li><b>Lifetime Extension.</b> <code>extendEntity</code> moves an expiry later, which gives the check-in a native renewal operation.</li>
+  <li><b>Immutable creator, mutable owner.</b> <code>$creator</code> is fixed at creation and is the authorship anchor. <code>$owner</code> controls writes, extension, transfer, and deletion.</li>
+  <li><b>Public reads without an operator backend.</b> Any client with an RPC endpoint can read the entities. The record does not depend on the application server.</li>
+</ol>
+<p>The design deliberately keeps the plaintext, the content key, and the shares off Arkiv.</p>
+
+<h2>3. Entity types</h2>
+<p>Entity types are modelled as a <code>type</code> attribute. Every entity also carries <code>project = "sakshi"</code>.</p>
+<table>
+  <tr><th>Type</th><th>Owner / creator</th><th>Creation flags</th><th>Expiration</th><th>Role</th></tr>
+  <tr><td><code>vault</code></td><td>holder</td><td><code>readonly: true</code></td><td><code>ExpirationTime.permanent()</code></td><td>Durable anchor; holds ciphertext and hash.</td></tr>
+  <tr><td><code>beat</code></td><td>holder</td><td>none</td><td><code>ExpirationTime.atDate(deadline)</code></td><td>The switch; the only expiring entity.</td></tr>
+  <tr><td><code>release</code></td><td>watchdog</td><td><code>readonly: true</code></td><td><code>ExpirationTime.permanent()</code></td><td>Records that the switch fired.</td></tr>
+</table>
+<p>The split is intentional. If the vault expired with the beat, the switch would delete the evidence at the moment of release. The vault must outlive the switch, so it is permanent. The beat must vanish when the holder stops checking in, so its lifetime is the deadline.</p>
+
+<h2>4. Attribute schema and value types</h2>
+<p>Arkiv attributes are typed. The type determines which query operators the index supports. Numeric types (<code>u64</code>, <code>i32</code>, <code>u256</code>, <code>dec</code>) support range comparisons; <code>str</code> supports equality and prefix; <code>bool</code>, <code>addr</code>, <code>key</code>, and <code>bytes32</code> support equality only.</p>
+
+<h3>4.1 Vault</h3>
+<table>
+  <tr><th>Attribute</th><th>Type</th><th>Example</th><th>Query use</th></tr>
+  <tr><td><code>project</code></td><td>str</td><td><code>sakshi</code></td><td>namespace equality</td></tr>
+  <tr><td><code>type</code></td><td>str</td><td><code>vault</code></td><td>type equality</td></tr>
+  <tr><td><code>evidence_hash</code></td><td>bytes32</td><td><code>0x…</code></td><td>equality only; integrity reference</td></tr>
+  <tr><td><code>created_ms</code></td><td>u64</td><td><code>1760000000000</code></td><td>range, if needed</td></tr>
+</table>
+
+<h3>4.2 Beat</h3>
+<table>
+  <tr><th>Attribute</th><th>Type</th><th>Example</th><th>Query use</th></tr>
+  <tr><td><code>project</code></td><td>str</td><td><code>sakshi</code></td><td>namespace equality</td></tr>
+  <tr><td><code>type</code></td><td>str</td><td><code>beat</code></td><td>type equality</td></tr>
+  <tr><td><code>vault_key</code></td><td>key</td><td><code>0x…</code></td><td>equality; joins beat to vault</td></tr>
+  <tr><td><code>deadline</code></td><td>u64</td><td><code>1760000600000</code></td><td>range (expiring soon, lapsed)</td></tr>
+  <tr><td><code>interval_s</code></td><td>u64</td><td><code>604800</code></td><td>display; renewal input</td></tr>
+</table>
+
+<h3>4.3 Release</h3>
+<table>
+  <tr><th>Attribute</th><th>Type</th><th>Example</th><th>Query use</th></tr>
+  <tr><td><code>project</code></td><td>str</td><td><code>sakshi</code></td><td>namespace equality</td></tr>
+  <tr><td><code>type</code></td><td>str</td><td><code>release</code></td><td>type equality</td></tr>
+  <tr><td><code>vault_key</code></td><td>key</td><td><code>0x…</code></td><td>equality; release for a vault</td></tr>
+  <tr><td><code>released_ms</code></td><td>u64</td><td><code>1760000700000</code></td><td>range</td></tr>
+</table>
+
+<div class="note">
+  <b>Naming rule.</b> Arkiv attribute names are 1 to 32 ASCII characters: a lowercase letter first, then lowercase letters, digits, <code>.</code>, <code>-</code>, and <code>_</code>. Uppercase letters are rejected at the node. The design uses snake_case (<code>valid_until</code>, <code>interval_s</code>) for this reason.
+</div>
+
+<h2>5. Payload encoding</h2>
+<p>The vault payload is JSON, stored as bytes with content type <code>application/json</code>:</p>
+<pre>{ "v": 1, "nonce": "&lt;base64&gt;", "ciphertext": "&lt;base64&gt;" }</pre>
+<p>The ciphertext is AES-256-GCM output with the 16-byte authentication tag appended. The payload is capped at 128 KiB by Arkiv, so only small evidence or a pointer to off-chain evidence fits.</p>
+<p>The beat payload is an empty <code>text/plain</code> body. The release payload is empty as well.</p>
+<p>The payload is never queried. Everything the application filters on is an attribute.</p>
+
+<h2>6. Lifetime model: Entity Expiration and Lifetime Extension</h2>
+<h3>6.1 Expiration</h3>
+<p>Every entity is created with an expiry. The wire form is a pair: an absolute target block and a minimum lifetime in blocks. The engine resolves both against the block the transaction lands in and takes the later value.</p>
+<pre>ExpirationTime.permanent()                 // vault, release
+ExpirationTime.atDate(new Date(deadline))  // beat
+ExpirationTime.fromDays(7)                 // relative lifetime
+ExpirationTime.atBlock(1_200_000n)         // absolute block</pre>
+<p>Durations must be a whole number of 2-second blocks. <code>fromSeconds(7)</code> is rejected; <code>fromSeconds(8)</code> is accepted. Deadlines derived from wall-clock timestamps should use <code>atDate</code>.</p>
+
+<h3>6.2 Extension</h3>
+<p><code>extendEntity</code> sets a new expiry. It is not additive: <code>fromDays(30)</code> means 30 days from now, not 30 days after the current expiry. An extension to an earlier block is rejected. A later expiry moves the entity out; an equal expiry is a no-op.</p>
+<pre>const result = await wallet.extendEntity({
+  entityKey: beatKey,
+  expires: ExpirationTime.atDate(new Date(deadlineMs)),
+});</pre>
+
+<h3>6.3 Expiration has no event</h3>
+<p>When an entity expires it leaves the query surface and every operation against it is rejected. Arkiv does not emit an event for expiration, and there is no grace period. The application must therefore track the deadline or poll <code>$expiresAt</code>.</p>
+
+<h2>7. Write path: creation</h2>
+<p>The current implementation performs two writes: the vault, then the beat.</p>
+<pre>const keyBytes = generateKey();
+const sealed = encrypt(keyBytes, evidence);
+const evidenceHash = keccak256(toBytes(JSON.stringify(sealed)));
+
+const vault = await wallet.createEntity({
+  payload: jsonToPayload({ v: 1, ...sealed }),
+  contentType: "application/json",
+  attributes: {
+    project: str("sakshi"),
+    type: str("vault"),
+    evidence_hash: bytes32(evidenceHash),
+    created_ms: u64(Date.now()),
+  },
+  expires: ExpirationTime.permanent(),
+  flags: { readonly: true },
+});
+
+const shares = split(keyBytes, 3, 2);
+const beat = await wallet.createEntity({
+  payload: stringToPayload(""),
+  contentType: "text/plain",
+  attributes: {
+    project: str("sakshi"),
+    type: str("beat"),
+    vault_key: key(vault.entityKey),
+    deadline: u64(deadlineMs),
+    interval_s: u64(intervalSeconds),
+  },
+  expires: ExpirationTime.atDate(new Date(deadlineMs)),
+});</pre>
+<p>Two technical points:</p>
+<ul>
+  <li><b>Ordering is required.</b> The beat references the vault key, so the vault must exist before the beat is written. The current code does this with two transactions. A single atomic batch would require <code>predictEntityKeys</code> plus a known salt.</li>
+  <li><b>Hash mismatch bug.</b> The hash is computed over <code>JSON.stringify(sealed)</code> but the payload stores <code>{ v: 1, ...sealed }</code>. The stored hash therefore does not cover the exact payload bytes. This is a correctness bug, not an Arkiv limitation.</li>
+</ul>
+
+<h2>8. Write path: check-in</h2>
+<p>A check-in must update two things: the <code>deadline</code> attribute (read by the UI and the watchdog) and the entity expiry (enforced by the network). The implementation uses one atomic batch.</p>
+<pre>const deadlineMs = Date.now() + intervalS * 1000;
+
+await wallet.executeBatch({
+  patches: [{
+    entityKey: beatKey,
+    set: { deadline: u64(deadlineMs) },
+  }],
+  extensions: [{
+    entityKey: beatKey,
+    expires: ExpirationTime.atDate(new Date(deadlineMs)),
+  }],
+});</pre>
+<p>The SDK applies batch operations in a fixed order: creates, patches, deletes, extensions, ownership changes. A later operation sees the effects of an earlier one. The patch therefore lands before the extension.</p>
+<p>Only the owner can patch and extend the beat. The beat is deliberately created without <code>readonly</code>, because <code>readonly</code> freezes the payload and attributes even for the owner; a check-in would be impossible.</p>
+
+<h2>9. Read path and exact queries</h2>
+<p>Reads use a public client. A query is a boolean expression; there is no <code>SELECT</code> or <code>WHERE</code> keyword in the raw form.</p>
+<pre>// live beats in the namespace
+client.select("*")
+  .where(and(eq("project", "sakshi"), eq("type", "beat")))
+  .limit(200)
+  .fetch();
+
+// releases for a vault
+client.select("*")
+  .where(and(
+    eq("project", "sakshi"),
+    eq("type", "release"),
+    eq("vault_key", key(vaultKey)),
+  ))
+  .fetch();
+
+// one entity by key
+client.getEntity(vaultKey);</pre>
+<p>Properties that shaped the read path:</p>
+<ul>
+  <li><b>No server-side ordering.</b> There is no <code>orderBy</code>. A time-ordered list must be sorted client-side or fetched through numeric range predicates on <code>deadline</code> or <code>created_ms</code>.</li>
+  <li><b>200 results per page.</b> <code>MAX_LIMIT</code> is 200. Pagination uses a cursor bound to a block; <code>hasNextPage()</code> and <code>next()</code> walk the pages. The current code does not yet paginate.</li>
+  <li><b>The SDK requires a predicate.</b> The builder rejects a match-all query, so every query starts with <code>project = "sakshi"</code>.</li>
+  <li><b>Typed literals.</b> A bare number defaults to <code>i32</code>. Comparing a <code>u64</code> attribute with a bare number can silently return zero rows; the literal must be wrapped with <code>u64()</code>.</li>
+</ul>
+
+<h2>10. Lapse detection without an expiry event</h2>
+<p>Because expiration emits no event, the switch cannot be observed by subscribing to a stream. The watchdog uses a poll plus deadline tracking:</p>
+<pre>try {
+  const beat = await getBeat(beatKey);       // getEntity under the hood
+  vaultKey = beat.vaultKey;
+  if (Date.now() &gt;= beat.deadline) {
+    await writeRelease(vaultKey);
+  }
+} catch (error) {
+  if (error instanceof NoEntityFoundError) {
+    await writeRelease(vaultKey);            // beat has expired
+  } else {
+    throw error;                             // network error: do not release
+  }
+}</pre>
+<p>The distinction between <code>NoEntityFoundError</code> and a transport error is critical. A transient RPC failure is not a lapse. The current UI does not make this distinction correctly, and it can write a false release; the fix is to keep the last known state, show an unreachable banner, and only fire on a confirmed expiry.</p>
+<p><code>getEntity</code> throws the same <code>NoEntityFoundError</code> for an entity that expired, was deleted, or never existed. A production system should add a tombstone or status entity if it needs to distinguish these cases.</p>
+<p>Historical verification is possible with <code>.atBlock(block)</code>, which returns entities as they existed at a past block, including entities that have since expired.</p>
+
+<h2>11. Release path</h2>
+<pre>const release = await wallet.createEntity({
+  payload: stringToPayload(""),
+  contentType: "text/plain",
+  attributes: {
+    project: str("sakshi"),
+    type: str("release"),
+    vault_key: key(vaultKey),
+    released_ms: u64(Date.now()),
+  },
+  expires: ExpirationTime.permanent(),
+  flags: { readonly: true },
+});</pre>
+<p>The release is written by the watchdog wallet, so its <code>$creator</code> is the watchdog. The current build does not authenticate the release endpoint and does not gate unseal on the existence of a release. Both are specified, not implemented.</p>
+
+<h2>12. Ownership, authorship, and the creator field</h2>
+<table>
+  <tr><th>System field</th><th>Mutability</th><th>Meaning in Sakshi</th></tr>
+  <tr><td><code>$creator</code></td><td>immutable</td><td>who wrote the entity; the authorship anchor</td></tr>
+  <tr><td><code>$owner</code></td><td>mutable</td><td>who controls writes, extension, transfer, deletion</td></tr>
+  <tr><td><code>$createdAt</code></td><td>immutable</td><td>block height of creation</td></tr>
+  <tr><td><code>$expiresAt</code></td><td>mutable</td><td>current expiry block</td></tr>
+</table>
+<p>The designer can query these fields but cannot set them. <code>changeOwnership</code> transfers control but does not change <code>$creator</code>; a <code>createdBy()</code> filter still finds the entity.</p>
+<div class="note">
+  <b>Current gap.</b> The application does not yet filter by <code>createdBy()</code>. Reads use <code>getEntity</code> by key and <code>select</code> on <code>project</code> and <code>type</code>. A production build must bind trust to <code>$creator</code> and reject entities from unexpected wallets, especially for the release.
+</div>
+
+<h2>13. SDK limits and constraints</h2>
+<table>
+  <tr><th>Constraint</th><th>Value</th><th>Consequence</th></tr>
+  <tr><td>Attribute count</td><td>30 cells (32 with payload and content type)</td><td>keep schemas narrow</td></tr>
+  <tr><td>Payload size</td><td>128 KiB</td><td>store a pointer for large evidence</td></tr>
+  <tr><td>String attribute</td><td>128 UTF-8 bytes</td><td>long text goes in the payload</td></tr>
+  <tr><td>Attribute name</td><td>1–32 ASCII, lowercase first</td><td>snake_case names</td></tr>
+  <tr><td>Result page</td><td>200</td><td>cursor pagination</td></tr>
+  <tr><td>Block time</td><td>2 s</td><td>deadlines and durations in blocks</td></tr>
+  <tr><td>Ordering</td><td>none</td><td>client-side sort</td></tr>
+  <tr><td>Expiry event</td><td>none</td><td>poll or track deadlines</td></tr>
+  <tr><td>Read budget</td><td>keyless quota</td><td>access key server-side; proxy for public reads</td></tr>
+</table>
+
+<h2>14. Error taxonomy and handling</h2>
+<table>
+  <tr><th>Error</th><th>Cause</th><th>Handling</th></tr>
+  <tr><td><code>InvalidExpiryError</code></td><td>lifetime not a whole block multiple, or dead on arrival</td><td>round to blocks; use <code>atDate</code> for deadlines</td></tr>
+  <tr><td><code>InvalidAttributeNameError</code></td><td>uppercase or reserved name</td><td>lowercase snake_case</td></tr>
+  <tr><td><code>TooManyAttributesError</code></td><td>more than the cell limit</td><td>move fields to the payload</td></tr>
+  <tr><td><code>UnknownAttributeTypeError</code></td><td>missing or wrong typed value</td><td>wrap every value in its constructor</td></tr>
+  <tr><td><code>NoEntityFoundError</code></td><td>expired, deleted, or never existed</td><td>treat as lapsed only after confirming the deadline</td></tr>
+  <tr><td><code>EntityMutationError</code></td><td>node rejected the write</td><td>surface the node message; retry only on transport errors</td></tr>
+  <tr><td><code>ConflictingMutationError</code></td><td>concurrent writes to the same entity</td><td>serialize check-ins per beat</td></tr>
+</table>
+
+<h2>15. Cryptographic envelope</h2>
+<p>The Arkiv layer stores an opaque envelope. The envelope is produced locally.</p>
+<table>
+  <tr><th>Property</th><th>Implementation</th></tr>
+  <tr><td>Content encryption</td><td>AES-256-GCM, 12-byte nonce, 16-byte tag appended</td></tr>
+  <tr><td>Key</td><td>32 random bytes, generated per vault</td></tr>
+  <tr><td>Key splitting</td><td>Shamir over GF(2^8), polynomial 0x1b, 3 shares, threshold 2</td></tr>
+  <tr><td>Share encoding</td><td>hex of <code>[x, y0, y1, ...]</code></td></tr>
+  <tr><td>Hash</td><td>keccak256 or SHA-256 over the sealed payload; see the hash bug in section 7</td></tr>
+</table>
+<p>The cryptographic envelope is outside Arkiv's trust boundary. Arkiv enforces existence, lifetime, and authorship; it does not verify the ciphertext or the claim. Decryption is a client operation.</p>
+
+<h2>16. Implemented versus specified</h2>
+<table>
+  <tr><th>Capability</th><th>Status</th></tr>
+  <tr><td>Typed attributes, <code>project</code>/<code>type</code> namespaces</td><td class="ok">implemented</td></tr>
+  <tr><td>Per-entity expiration (vault permanent, beat expiring)</td><td class="ok">implemented</td></tr>
+  <tr><td><code>extendEntity</code> check-in</td><td class="ok">implemented</td></tr>
+  <tr><td>Atomic <code>executeBatch</code> patch plus extension</td><td class="ok">implemented</td></tr>
+  <tr><td><code>readonly</code> vault and release</td><td class="ok">implemented</td></tr>
+  <tr><td><code>key</code> reference from beat to vault</td><td class="ok">implemented</td></tr>
+  <tr><td>Release entity on lapse</td><td class="ok">implemented</td></tr>
+  <tr><td>Public read without the application backend (CLI)</td><td class="ok">implemented</td></tr>
+  <tr><td><code>createdBy()</code> trust filtering</td><td class="no">not implemented</td></tr>
+  <tr><td>Cursor pagination for lists</td><td class="no">not implemented</td></tr>
+  <tr><td><code>watchEntityEvents</code> over WebSocket</td><td class="no">not implemented</td></tr>
+  <tr><td>Atomic batch creation with <code>predictEntityKeys</code></td><td class="no">not implemented</td></tr>
+  <tr><td>Release-gated unseal</td><td class="no">not implemented</td></tr>
+  <tr><td>On-chain entities from a funded run</td><td class="no">not yet created</td></tr>
+</table>
+
+<h2>17. Friction log, technical edition</h2>
+<ol>
+  <li><b>Expiry is silent.</b> No event, no grace period, and expired entities disappear from queries. A switch must poll <code>$expiresAt</code> or track deadlines.</li>
+  <li><b><code>readonly</code> does not stop extension, transfer, or deletion.</b> It freezes attributes and payload only. Control therefore comes from ownership, not the flag.</li>
+  <li><b>Durations must be whole blocks.</b> <code>fromSeconds(7)</code> is rejected; use <code>atDate</code> for wall-clock deadlines.</li>
+  <li><b><code>executeBatch</code> order is fixed</b> (creates, patches, deletes, extensions, ownership), which the atomic check-in relies on.</li>
+  <li><b>Attribute read-back is a tagged cell</b>, so numeric values must be parsed.</li>
+  <li><b>No server-side ordering and a 200-row page.</b> Lists must be paged and sorted client-side.</li>
+  <li><b>The SDK requires a predicate</b> where raw RPC accepts <code>*</code>.</li>
+  <li><b>Keyless read budget is small</b>, and an access key in browser code leaks. Public reads need a server-side proxy or a deliberate keyless budget.</li>
+</ol>
+
+<h2>18. Reproduction</h2>
+<pre>git clone https://github.com/Rajshah1302/sakshi
+cd sakshi
+npm install
+npm run simulate         # AES-GCM + Shamir
+npm run simulate:switch  # create, check-in, lapse, release, unseal
+npm run test:backend     # demo backend end to end
+npm run typecheck:all
+npm run build:web</pre>
+<p>For the live Arkiv path, a funded Tiramisu wallet is required:</p>
+<pre>npm run wallet -- --write
+npm run create -- ./evidence.txt 604800
+npm run checkin -- &lt;beatKey&gt; 604800
+npm run watch -- &lt;beatKey&gt; &lt;vaultKey&gt;
+npm run release -- &lt;vaultKey&gt; &lt;shareA&gt; &lt;shareB&gt; released.bin</pre>
+
+<h2>19. File map</h2>
+<table>
+  <tr><th>Path</th><th>Responsibility</th></tr>
+  <tr><td><code>src/arkiv/client.ts</code></td><td>public and wallet clients</td></tr>
+  <tr><td><code>src/arkiv/entities.ts</code></td><td>constants and attribute readers</td></tr>
+  <tr><td><code>src/arkiv/mutations.ts</code></td><td>create, check-in, release</td></tr>
+  <tr><td><code>src/arkiv/queries.ts</code></td><td>get, list, unseal</td></tr>
+  <tr><td><code>src/crypto/aes.ts</code></td><td>AES-256-GCM</td></tr>
+  <tr><td><code>src/crypto/shamir.ts</code></td><td>GF(2^8) secret sharing</td></tr>
+  <tr><td><code>server/backend.ts</code></td><td>live and demo backends</td></tr>
+  <tr><td><code>server/index.ts</code></td><td>Express API</td></tr>
+  <tr><td><code>web/src/browser-crypto.ts</code></td><td>WebCrypto and browser Shamir</td></tr>
+  <tr><td><code>web/src/demo.ts</code></td><td>client-side demo backend</td></tr>
+  <tr><td><code>arkiv/schema.md</code></td><td>entity contract and exact queries</td></tr>
+  <tr><td><code>arkiv/friction.md</code></td><td>the full friction log</td></tr>
+</table>
+
+<h2>20. Appendix A: exact raw RPC queries</h2>
+<pre>project = str('sakshi') AND type = str('beat')
+
+project = str('sakshi') AND type = str('release') AND vault_key = key('0x…')
+
+$creator = addr(0x…) AND project = str('sakshi')
+
+app = str('sakshi') AND type = str('beat') AND deadline &gt; u64(1760000000000)</pre>
+<p>The raw grammar uses typed literals: <code>str('…')</code>, <code>u64(…)</code>, <code>key(0x…)</code>, <code>addr(0x…)</code>. Boolean operators are <code>AND</code>, <code>OR</code>, <code>NOT</code>, and there is no <code>!=</code>; use <code>NOT (attr = value)</code>.</p>
+
+<h2>21. Appendix B: references</h2>
+<ol>
+  <li>Arkiv documentation, https://docs.arkiv.network</li>
+  <li>Arkiv Tiramisu network, https://docs.arkiv.network/networks/tiramisu/</li>
+  <li>TypeScript SDK 0.8, querying and mutating data, https://docs.arkiv.network/typescript-sdk/</li>
+  <li>Shamir, A., How to share a secret, 1979.</li>
+  <li>NIST SP 800-38D, Galois/Counter Mode.</li>
+</ol>
+
+<p class="small" style="margin-top: 18pt;">End of paper.</p>
+
+</body>
+</html>

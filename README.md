@@ -816,7 +816,8 @@ fix.
 
 ## 19. Whitepaper
 
-The formal whitepaper is in [`docs/whitepaper.md`](docs/whitepaper.md). It covers:
+The formal whitepaper is in [`docs/whitepaper.md`](docs/whitepaper.md).
+The Arkiv engineering paper is in [`docs/arkiv-technical-whitepaper.pdf`](docs/arkiv-technical-whitepaper.pdf) (PDF), with its print source in [`docs/arkiv-technical-whitepaper.html`](docs/arkiv-technical-whitepaper.html). It covers:
 
 - the threat model in formal terms;
 - the three primitives and their lifetimes;
