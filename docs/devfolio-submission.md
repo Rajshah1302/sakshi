@@ -30,7 +30,7 @@ These are in the landing copy or plan but not in the code. Remove the claims or 
 - **Tagline:** A dead man's switch for evidence.
 - **Repo:** https://github.com/Rajshah1302/sakshi
 - **Live app:** https://sakshi-eta-eight.vercel.app
-- **Demo video:** https://sakshi-eta-eight.vercel.app/sakshi-demo.mp4
+- **Demo video:** https://sakshi-eta-eight.vercel.app/sakshi-demo-vo.mp4
 - **Tracks:** Best Indian Use Case, Censorship Resistance, Privacy
 
 ## The problem it solves
