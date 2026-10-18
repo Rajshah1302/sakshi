@@ -1,3 +1,5 @@
+import { demo } from "./demo";
+
 export type Mode = "live" | "demo";
 
 export interface Health {
@@ -37,6 +39,8 @@ export interface Stats {
   recent: StatVault[];
 }
 
+const DEMO = import.meta.env.VITE_DEMO === "true";
+
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api${path}`, {
     headers: { "content-type": "application/json" },
@@ -50,19 +54,42 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health: () => call<Health>("/health"),
-  stats: () => call<Stats>("/stats"),
-  create: (text: string, intervalS: number) =>
-    call<CreateResponse>("/create", { method: "POST", body: JSON.stringify({ text, intervalS }) }),
-  checkIn: (beatKey: string, intervalS: number) =>
-    call<{ deadlineMs: number; txHash?: string }>(`/checkin/${beatKey}`, {
-      method: "POST",
-      body: JSON.stringify({ intervalS }),
-    }),
-  beat: (beatKey: string) => call<BeatResponse>(`/beat/${beatKey}`),
-  vault: (vaultKey: string) => call<{ evidenceHash: string }>(`/vault/${vaultKey}`),
-  release: (vaultKey: string) =>
-    call<{ releaseKey: string; txHash?: string }>(`/release/${vaultKey}`, { method: "POST" }),
-  unseal: (vaultKey: string, shares: string[]) =>
-    call<{ text: string }>("/unseal", { method: "POST", body: JSON.stringify({ vaultKey, shares }) }),
+  health: async (): Promise<Health> => (DEMO ? demo.health() : call<Health>("/health")),
+
+  stats: async (): Promise<Stats> => (DEMO ? demo.stats() : call<Stats>("/stats")),
+
+  create: async (text: string, intervalS: number): Promise<CreateResponse> =>
+    DEMO
+      ? demo.create(text, intervalS)
+      : call<CreateResponse>("/create", {
+          method: "POST",
+          body: JSON.stringify({ text, intervalS }),
+        }),
+
+  checkIn: async (beatKey: string, intervalS: number): Promise<{ deadlineMs: number; txHash?: string }> =>
+    DEMO
+      ? demo.checkIn(beatKey, intervalS)
+      : call<{ deadlineMs: number; txHash?: string }>(`/checkin/${beatKey}`, {
+          method: "POST",
+          body: JSON.stringify({ intervalS }),
+        }),
+
+  beat: async (beatKey: string): Promise<BeatResponse> =>
+    DEMO ? demo.beat(beatKey) : call<BeatResponse>(`/beat/${beatKey}`),
+
+  vault: async (vaultKey: string): Promise<{ evidenceHash: string }> =>
+    DEMO ? demo.vault(vaultKey) : call<{ evidenceHash: string }>(`/vault/${vaultKey}`),
+
+  release: async (vaultKey: string): Promise<{ releaseKey: string; txHash?: string }> =>
+    DEMO
+      ? demo.release(vaultKey)
+      : call<{ releaseKey: string; txHash?: string }>(`/release/${vaultKey}`, { method: "POST" }),
+
+  unseal: async (vaultKey: string, shares: string[]): Promise<{ text: string }> =>
+    DEMO
+      ? demo.unseal(vaultKey, shares)
+      : call<{ text: string }>("/unseal", {
+          method: "POST",
+          body: JSON.stringify({ vaultKey, shares }),
+        }),
 };

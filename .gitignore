@@ -7,3 +7,5 @@ dist/
 .turbo/
 scripts/out/
 server/.demo-store.json
+
+.vercel
