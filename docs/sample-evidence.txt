@@ -1,0 +1,11 @@
+SAKSHI DEMO EVIDENCE (non-sensitive)
+
+This file exists only to exercise the on-chain Sakshi flow on the Arkiv
+Tiramisu testnet. It contains no personal data and no real evidence.
+
+Timestamp: 2026-10-19
+Purpose: create a Vault entity, a Beat entity, let the Beat expire, write a
+Release entity, and unseal the Vault with two of the three guardian shares.
+
+If you are reading this in plaintext, the switch fired and two guardians
+reconstructed the key.
