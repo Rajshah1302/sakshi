@@ -118,8 +118,28 @@ watcher walks cursors and sorts client-side.
 
 ## On-chain evidence
 
-_Fill after the first funded run._
+Funded run: **2026-10-18** on Tiramisu (chain `7738577`).
 
-- Holder: `<holder-wallet>`
-- Watchdog: `<watchdog-wallet>`
-- Example vault: `<entity-key>` / tx `<tx-hash>`
+- Holder / creator: `0x47c030be837C1230A555A1780F145a7808129c62`
+- Watchdog: the same wallet in this demo run
+- Example vault: `0x339396d6344ff1d888c09bc2d988818cb6e5f4677a52b2a6fb96f6aa3c75f323`
+  - created in block `753156` at `2026-10-18T20:41:12.910Z`
+  - `readonly`, permanent (`expiresAt` = `2^64 - 1`)
+  - `evidence_hash`: `0x82624a52ec27ff091b20d0eb10de7d14528a6bd0186d9af1a2e006d012844938`
+  - payload: 674 bytes (AES-256-GCM nonce + ciphertext)
+- Example beat: `0x2571468ef6cfee4f470bd0392c59952d973ad35b2e9ec6ae35a9e6c5a1fca020`
+  - created with a 120 s lease, extended once to `2026-10-18T20:45:00.539Z`
+  - check-in tx: `0x6f5283ae03e20b0974b0994c58d2b075d1df8e20b1c9e0bf19c7247fcbb370f9`
+  - after expiry, `getEntity(beatKey)` throws `NoEntityFoundError` (verified)
+- Example release: `0xa902e3542c085d36672345c91c31803809746c9e953c17216040143d3c0e404d`
+  - created in block `753279` at `2026-10-18T20:45:20.051Z`
+  - release tx: `0x5eae55978ac9620b00cc57be40cc0de333bfbbe80dbc5d6dd82b022564a08218`
+- Unseal: guardian shares 1 and 2 reconstructed the key. The released 451-byte file has
+  SHA-256 `614A99A6315759DCC9CC651EB7F8EE00C7CDE4F614957D739C3D135560689E3B`,
+  byte-for-byte identical to `docs/sample-evidence.txt`.
+- Creation transactions are not returned by `getEntity`. The entity keys plus the
+  check-in and release transactions above are the verifiable record.
+
+The first check-in with a 90 s lease was rejected because the beat already had a 120 s
+lease: `extendEntity` refuses to shorten an entity's life. Re-running with 180 s
+succeeded. This is intended behavior, and it is a useful guard for a switch.
