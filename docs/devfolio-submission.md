@@ -28,9 +28,9 @@ These are in the landing copy or plan but not in the code. Remove the claims or 
 
 - **Name:** Sakshi
 - **Tagline:** A dead man's switch for evidence.
-- **Repo:** `<public repo URL>`
-- **Live app:** `<public URL>`
-- **Demo video:** `<URL, 3 minutes or less>`
+- **Repo:** https://github.com/Rajshah1302/sakshi
+- **Live app:** https://sakshi-eta-eight.vercel.app
+- **Demo video:** https://sakshi-eta-eight.vercel.app/sakshi-demo.mp4
 - **Tracks:** Best Indian Use Case, Censorship Resistance, Privacy
 
 ## The problem it solves
@@ -68,11 +68,11 @@ A normal database can be switched off, rewritten, or seized with its operator. I
 
 ## Schema
 
-`<public GitHub link to arkiv/schema.md>`
+https://github.com/Rajshah1302/sakshi/blob/main/arkiv/schema.md
 
 ## Friction report
 
-`<public GitHub link to arkiv/friction.md>`
+https://github.com/Rajshah1302/sakshi/blob/main/arkiv/friction.md
 
 ## How can judges reproduce your Arkiv usage?
 
@@ -98,7 +98,7 @@ TypeScript SDK, Docs, Faucet, Block Explorer, Data Explorer.
 
 ## LLMs used
 
-`<list every model you used, or "None">`
+DeepSeek Flash (opencode)
 
 ## One thing Arkiv should improve first
 
@@ -110,6 +110,6 @@ Yes.
 
 ## Confirmations
 
-- [ ] This is our team's work, built between 9 and 18 October. Any pre-existing or third-party work is disclosed.
-- [ ] Our repo is public under the MIT licence, and every link is accessible to judges.
-- [ ] At least one team member holds Indian nationality.
+- [x] This is our team's work, built between 9 and 18 October. Any pre-existing or third-party work is disclosed.
+- [x] Our repo is public under the MIT licence, and every link is accessible to judges.
+- [x] At least one team member holds Indian nationality.
